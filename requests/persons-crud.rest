@@ -23,7 +23,16 @@ DELETE http://localhost:3001/api/persons/-1
 POST http://localhost:3001/api/persons
 Content-Type: application/json
 
-{
-   "name": "John Deere",
-   "number": "123-4567890"
-}
+{ "name": "John Deere", "number": "123-4567890" }
+
+### add person - invalid request
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{ "name": "John Deere" }
+
+### add person - given name allready exists
+POST http://localhost:3001/api/persons
+Content-Type: application/json
+
+{ "name": "Arto Hellas", "number": "987654321" }

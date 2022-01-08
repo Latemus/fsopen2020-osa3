@@ -35,6 +35,12 @@ app.delete('/api/persons/:id', (request, response) => {
 
 app.post('/api/persons', (request, response) => {
   const {body} = request  
+  if (!nameIsUnique(body)) {
+    return response.status(400).json({ error: `Name is allready in phone book. Name must be unique` })
+  }
+  if (!userIsValid(body)) {
+    return response.status(400).json({ error: `Name and number are required for a person` })
+  }
   const person = {
     name: body.name,
     number: body.number,
@@ -48,6 +54,14 @@ const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+var nameIsUnique = person => {
+  return !persons.some(u => u.name === person.name)
+}
+
+var userIsValid = user => {
+  return user && user.name && user.name.length > 0 && user.number && user.number.length > 0 
+}
 
 var generateId = () => {
   // if (persons.length === 0) {
