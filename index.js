@@ -1,7 +1,7 @@
 const express = require('express')
 
 const mockData = require('./db.json')
-const {persons} = mockData
+let {persons} = mockData
 
 const app = express()
 app.use(express.json())
@@ -25,6 +25,12 @@ app.get('/api/persons/:id', (request, response) => {
     return response.status(404).json({ error: `Person not found with id ${id}` })
   }
   response.json(person)
+})
+
+app.delete('/api/persons/:id', (request, response) => {
+  const id = Number(request.params.id)
+  persons = persons.filter(person => person.id != id)
+  response.status(204).end()
 })
 
 const PORT = 3001
