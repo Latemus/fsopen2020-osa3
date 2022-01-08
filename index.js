@@ -33,11 +33,31 @@ app.delete('/api/persons/:id', (request, response) => {
   response.status(204).end()
 })
 
+app.post('/api/persons', (request, response) => {
+  const {body} = request  
+  const person = {
+    name: body.name,
+    number: body.number,
+    id: generateId()
+  }
+  persons.push(person)
+  return response.json(person)
+})
+
 const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
+var generateId = () => {
+  // if (persons.length === 0) {
+  //   return 0
+  // }
+  // return Math.max( ...persons.map(p => p.id)) + 1
+
+  // Math.Random was declared in the exercise
+  return Math.round(Math.random() * 100000)
+}
 
 var getInfoPage = (personCount) => `
   <div>Phonebook has info for ${personCount} people</div>
