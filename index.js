@@ -10,6 +10,7 @@ let {persons} = mockData
 
 // Define express server and use middleware
 const app = express()
+app.use(express.static('frontend-build'))
 app.use(cors())
 app.use(express.json())
 
