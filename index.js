@@ -1,10 +1,12 @@
 const express = require('express')
+const morgan = require('morgan')
 
 const mockData = require('./db.json')
 let {persons} = mockData
 
 const app = express()
 app.use(express.json())
+app.use(morgan('tiny'))
 
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1><div>Check API-endpoint /persons</div>')
