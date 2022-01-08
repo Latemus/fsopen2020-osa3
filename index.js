@@ -10,6 +10,10 @@ app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1><div>Check API-endpoint /persons</div>')
 })
 
+app.get('/info', (req, res) => {
+  res.send(getInfoPage(persons.length))
+})
+
 app.get('/api/persons', (req, res) => {
   res.json(persons)
 })
@@ -18,3 +22,10 @@ const PORT = 3001
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
+
+
+var getInfoPage = (personCount) => `
+  <div>Phonebook has info for ${personCount} people</div>
+  <hr/>
+  <div>${new Date()}</div>
+`
