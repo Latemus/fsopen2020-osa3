@@ -1,32 +1,48 @@
 const express = require('express')
 const cors = require('cors')
 const morgan = require('morgan')
+const fs = require('fs')
+const showdown  = require('showdown')
 
+// Import mock data
 const mockData = require('./db.json')
 let {persons} = mockData
 
+// Define express server and use middleware
 const app = express()
 app.use(cors())
 app.use(express.json())
 
-// Configure and use morgan
+// Configure and use morgan in tiny configuration with added JSON body content print
 morgan.token('body-content', (req, res) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body-content'))
 
+// Import README.md to add it to the root route
+const parseMD = require('parse-md').default
+const fileContents = fs.readFileSync('./README.md', 'utf8')
+const { content } = parseMD(fileContents)
+
+// Convert .md to html
+const converter = new showdown.Converter()
+const html = converter.makeHtml(content)
+
+
+const basePath = '/api/persons'
+
 // All routes
 app.get('/', (req, res) => {
-  res.send('<h1>Hello World!</h1><div>Check API-endpoint /persons</div>')
+  res.send(`${html}`)
 })
 
 app.get('/info', (req, res) => {
   res.send(getInfoPage(persons.length))
 })
 
-app.get('/api/persons', (req, res) => {
+app.get(basePath, (req, res) => {
   res.json(persons)
 })
 
-app.get('/api/persons/:id', (request, response) => {
+app.get(`${basePath}/:id`, (request, response) => {
   const id = Number(request.params.id)
   const person = persons.find(person => person.id === id)
   if (!person) {
@@ -35,13 +51,13 @@ app.get('/api/persons/:id', (request, response) => {
   response.json(person)
 })
 
-app.delete('/api/persons/:id', (request, response) => {
+app.delete(`${basePath}/:id`, (request, response) => {
   const id = Number(request.params.id)
   persons = persons.filter(person => person.id != id)
   response.status(204).end()
 })
 
-app.post('/api/persons', (request, response) => {
+app.post(basePath, (request, response) => {
   const {body} = request  
   if (!nameIsUnique(body)) {
     return response.status(400).json({ error: `Name is allready in phone book. Name must be unique` })
