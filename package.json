@@ -1,0 +1,27 @@
+{
+  "name": "puhelinluettelo-backend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "nodemon": "nodemon index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Latemus/fsopen2020-osa3.git"
+  },
+  "author": "Lauri Viitanen",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Latemus/fsopen2020-osa3/issues"
+  },
+  "homepage": "https://github.com/Latemus/fsopen2020-osa3#readme",
+  "dependencies": {
+    "express": "^4.17.2"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.15"
+  }
+}

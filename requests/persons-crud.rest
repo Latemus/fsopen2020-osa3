@@ -1,0 +1,5 @@
+### root endpoint
+GET http://localhost:3001/
+
+### get all persons
+GET http://localhost:3001/api/persons
