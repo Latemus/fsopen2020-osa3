@@ -6,8 +6,12 @@ let {persons} = mockData
 
 const app = express()
 app.use(express.json())
-app.use(morgan('tiny'))
 
+// Configure and use morgan
+morgan.token('body-content', (req, res) => JSON.stringify(req.body))
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body-content'))
+
+// All routes
 app.get('/', (req, res) => {
   res.send('<h1>Hello World!</h1><div>Check API-endpoint /persons</div>')
 })
@@ -57,6 +61,7 @@ app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`)
 })
 
+// Helper functions
 var nameIsUnique = person => {
   return !persons.some(u => u.name === person.name)
 }
