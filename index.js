@@ -3,26 +3,28 @@ const cors = require('cors')
 const morgan = require('morgan')
 const fs = require('fs')
 const showdown  = require('showdown')
+const personService = require('./service/person-service.js')
 
-// Import mock data
-const mockData = require('./db.json')
-let {persons} = mockData
+// Database connection
+const dbUtils = require('./database/mongo.js')
+dbUtils.connectToDatabase()
 
 // Define express server and use middleware
 const app = express()
-app.use(express.static('frontend-build'))
+const PORT = process.env.PORT || 3001
 app.use(cors())
 app.use(express.json())
+
+// Add static frontend build
+// app.use(express.static('frontend-build'))
 
 // Configure and use morgan in tiny configuration with added JSON body content print
 morgan.token('body-content', (req, res) => JSON.stringify(req.body))
 app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body-content'))
-
 // Import README.md to add it to the root route
 const parseMD = require('parse-md').default
 const fileContents = fs.readFileSync('./README.md', 'utf8')
 const { content } = parseMD(fileContents)
-
 // Convert .md to html
 const converter = new showdown.Converter()
 const html = converter.makeHtml(content)
@@ -36,68 +38,44 @@ app.get('/', (req, res) => {
 })
 
 app.get('/info', (req, res) => {
-  res.send(getInfoPage(persons.length))
+  res.send(getInfoPage(personService.getAll().length))
 })
 
 app.get(basePath, (req, res) => {
-  res.json(persons)
+  personService.getAll().then(result => {
+    return res.json(result)
+  })
 })
 
-app.get(`${basePath}/:id`, (request, response) => {
-  const id = Number(request.params.id)
-  const person = persons.find(person => person.id === id)
+// Tämäkin toimiva tapa, mutta yllä oleva todennäköisesti vähemmän virhealtis
+// app.get(basePath, async (req, res) => {
+//   res.json(await personService.getAll())
+// })
+
+app.get(`${basePath}/:id`, async (request, response) => {
+  const person = await personService.getById(request.params.id)
   if (!person) {
-    return response.status(404).json({ error: `Person not found with id ${id}` })
+    return response.status(404).json({ error: `Person not found with id ${request.params.id}` })
   }
-  response.json(person)
-})
-
-app.delete(`${basePath}/:id`, (request, response) => {
-  const id = Number(request.params.id)
-  persons = persons.filter(person => person.id != id)
-  response.status(204).end()
-})
-
-app.post(basePath, (request, response) => {
-  const {body} = request  
-  if (!nameIsUnique(body)) {
-    return response.status(400).json({ error: `Name is allready in phone book. Name must be unique` })
-  }
-  if (!userIsValid(body)) {
-    return response.status(400).json({ error: `Name and number are required for a person` })
-  }
-  const person = {
-    name: body.name,
-    number: body.number,
-    id: generateId()
-  }
-  persons.push(person)
   return response.json(person)
 })
 
-const PORT = process.env.PORT || 3001
-app.listen(PORT, () => {
-  console.log(`Server running on port ${PORT}`)
+app.delete(`${basePath}/:id`, async (request, response) => {
+  await personService.deletePerson(request.params.id)
+  return response.status(204).end()
 })
 
-// Helper functions
-var nameIsUnique = person => {
-  return !persons.some(u => u.name === person.name)
-}
+app.post(basePath, async (request, response) => {
+  const {body} = request
+  const person = await personService.addNewPerson(body)
+  return response.json(person)
+})
 
-var userIsValid = user => {
-  return user && user.name && user.name.length > 0 && user.number && user.number.length > 0 
-}
 
-var generateId = () => {
-  // if (persons.length === 0) {
-  //   return 0
-  // }
-  // return Math.max( ...persons.map(p => p.id)) + 1
-
-  // Math.Random was declared in the exercise
-  return Math.round(Math.random() * 100000)
-}
+// Start the server
+app.listen(PORT, () => {
+  console.log(`Server running on port ${PORT}. In local development open localhost:${PORT}`)
+})
 
 var getInfoPage = (personCount) => `
   <div>Phonebook has info for ${personCount} people</div>
