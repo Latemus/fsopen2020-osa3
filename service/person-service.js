@@ -10,7 +10,7 @@ const getById = id => {
    return Person.find({ _id: id })
 }
 
-const addNewPerson = personData => {
+const addNewPerson = async personData => {
    // if (!nameIsUnique(personData)) {
    //    response.status(400).json({ error: `Name is allready in phone book. Name must be unique` })
    // }
@@ -23,9 +23,9 @@ const addNewPerson = personData => {
       number: personData.number,
    })
 
-	const newPerson = person.save()
+	const newPerson = await person.save()
    console.log(`Added ${person.name} number ${person.number} to phonebook`)
-	return getById(newPerson._id)
+   return newPerson
 }
 
 const deletePerson = id => {
