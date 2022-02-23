@@ -31,7 +31,7 @@ const getDbAdditionalConfig = () => {
 
 const handleDatabaseError = error => {
 	console.log('Error with Mongo database:');
-	console.log(err)
+	console.log(error)
 }
 
 module.exports = { connectToDatabase }
