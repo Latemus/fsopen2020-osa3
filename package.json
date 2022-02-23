@@ -7,7 +7,9 @@
     "start": "node index.js",
     "nodemon": "nodemon index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "inspect": "node --inspect index.js"
+    "inspect": "node --inspect index.js",
+    "lint": "eslint .",
+    "lint-fix": "eslint . --fix"
   },
   "repository": {
     "type": "git",
@@ -29,6 +31,7 @@
     "showdown": "^1.9.1"
   },
   "devDependencies": {
+    "eslint": "^8.9.0",
     "nodemon": "^2.0.15"
   }
 }

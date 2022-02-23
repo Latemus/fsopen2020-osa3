@@ -3,7 +3,6 @@ const cors = require('cors')
 const morgan = require('morgan')
 const fs = require('fs')
 const showdown  = require('showdown')
-const mongoose = require('mongoose')
 const Person = require('./model/person')
 
 // Database connection
@@ -19,7 +18,7 @@ const PORT = process.env.PORT || 3001
 // app.use(express.static('frontend-build'))
 
 // Configure and use morgan in tiny configuration with added JSON body content print
-morgan.token('body-content', (req, res) => JSON.stringify(req.body))
+morgan.token('body-content', req => JSON.stringify(req.body))
 // Import README.md to add it to the root route
 const parseMD = require('parse-md').default
 const fileContents = fs.readFileSync('./README.md', 'utf8')
@@ -65,7 +64,7 @@ app.delete(`${basePath}/:id`, async (request, response, next) => {
 })
 
 app.post(basePath, async (request, response, next) => {
-  const {body} = request
+  const { body } = request
   // if (!nameIsUnique(personData)) {
   //    response.status(400).json({ error: `Name is allready in phone book. Name must be unique` })
   // }
@@ -96,8 +95,8 @@ app.put(`${basePath}/:id`, (request, response, next) => {
   console.log(person)
 
   Person.findByIdAndUpdate(
-    request.params.id, 
-    { name: body.name, number: body.number}, 
+    request.params.id,
+    { name: body.name, number: body.number },
     { new: true, runValidators: true, context: 'query' }
   )
     .then(updatedPerson => response.json(updatedPerson))
@@ -128,7 +127,7 @@ const errorHandler = (error, request, response, next) => {
   console.error(`[ERROR] ${error.message}`)
   if (error.name === 'CastError') {
     return response.status(400).send({ error: 'malformatted id' })
-  } 
+  }
   else if (error.name === 'ValidationError') {
     return response.status(400).json({ error: error.message })
   }
