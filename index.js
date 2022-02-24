@@ -13,12 +13,15 @@ dbUtils.connectToDatabase()
 const app = express()
 const PORT = process.env.PORT || 3001
 
-
-// Add static frontend build
+// Add static frontend build. Uncomment to use
 // app.use(express.static('frontend-build'))
 
+app.use(cors())
+app.use(express.json())
 // Configure and use morgan in tiny configuration with added JSON body content print
 morgan.token('body-content', req => JSON.stringify(req.body))
+app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body-content'))
+
 // Import README.md to add it to the root route
 const parseMD = require('parse-md').default
 const fileContents = fs.readFileSync('./README.md', 'utf8')
@@ -27,10 +30,6 @@ const { content } = parseMD(fileContents)
 const converter = new showdown.Converter()
 const html = converter.makeHtml(content)
 const basePath = '/api/persons'
-
-app.use(cors())
-app.use(express.json())
-app.use(morgan(':method :url :status :res[content-length] - :response-time ms :body-content'))
 
 
 // All routes
@@ -65,35 +64,20 @@ app.delete(`${basePath}/:id`, async (request, response, next) => {
 
 app.post(basePath, async (request, response, next) => {
   const { body } = request
-  // if (!nameIsUnique(personData)) {
-  //    response.status(400).json({ error: `Name is allready in phone book. Name must be unique` })
-  // }
-  // if (!userIsValid(personData)) {
-  //    return response.status(400).json({ error: `Name and number are required for a person` })
-  // }
   const person = new Person({
     name: body.name,
     number: body.number,
   })
-
   person.save()
     .then(person => {
       console.log(`Added ${person.name} number ${person.number} to phonebook`)
       return response.json(person)
     })
     .catch(error => next(error))
-
 })
 
 app.put(`${basePath}/:id`, (request, response, next) => {
   const body = request.body
-  const person = {
-    name: body.name,
-    number: body.number,
-  }
-
-  console.log(person)
-
   Person.findByIdAndUpdate(
     request.params.id,
     { name: body.name, number: body.number },
@@ -102,14 +86,6 @@ app.put(`${basePath}/:id`, (request, response, next) => {
     .then(updatedPerson => response.json(updatedPerson))
     .catch(error => next(error))
 })
-
-// const getPersonOrReturnNotFound = async (id, response) => {
-//   const person = await Person.find({ _id: id })
-//   if (!person) {
-//     return response.status(404).json({ error: `Person not found with id ${request.params.id}` })
-//   }
-//   return person
-// }
 
 const unknownEndpoint = (request, response) => {
   response.status(404).send({ error: 'unknown endpoint' })
@@ -135,9 +111,8 @@ const errorHandler = (error, request, response, next) => {
   next(error)
 }
 
+// Error handler middleware
 app.use(errorHandler)
-
-
 
 // Start the server
 app.listen(PORT, () => {
